@@ -1,0 +1,36 @@
+{
+  "name": "angular-ahdin",
+  "version": "1.0.0",
+  "description": "Image file compression service for AngularJS applications",
+  "main": "dist/ahdin.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "gulp": "3.8.11",
+    "gulp-angular-filesort": "1.1.1",
+    "gulp-clean": "0.3.1",
+    "gulp-concat": "2.5.2",
+    "gulp-copy": "0.0.2",
+    "gulp-load-plugins": "0.8.1",
+    "gulp-ng-annotate": "0.5.2",
+    "gulp-rename": "1.2.0",
+    "gulp-uglify": "1.1.0",
+    "karma": "0.12.31",
+    "karma-angular-filesort": "0.1.0",
+    "karma-jasmine": "0.3.5"
+  },
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fastmonkeys/angular-ahdin.git"
+  },
+  "author": "Roope Hovi <roope.hovi@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fastmonkeys/angular-ahdin/issues"
+  },
+  "homepage": "https://github.com/fastmonkeys/angular-ahdin"
+}

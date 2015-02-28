@@ -1,0 +1,10 @@
+dependencies:
+  override:
+    - npm install
+    - bower install
+    - rm bower.json
+
+test:
+  override:
+    - rm -rf bower_components/angular && rm -rf bower_components/angular-mocks && bower install angular#1.2.* && bower install angular-mocks#1.2.* && npm test
+    - rm -rf bower_components/angular && rm -rf bower_components/angular-mocks && bower install angular#1.3.* && bower install angular-mocks#1.3.* && npm test
