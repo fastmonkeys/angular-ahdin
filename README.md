@@ -1,5 +1,7 @@
 angular-ahdin
 ================
+[![Circle CI](https://circleci.com/gh/fastmonkeys/angular-ahdin.svg?style=svg&circle-token=63549aa009011e699bd383e96b3f5e0de67b32ec)](https://circleci.com/gh/fastmonkeys/angular-ahdin)
+
 Lossy compression module for AngularJS applications. It takes image `File`s or `Blob`s and compresses them to `Blob`s. It also fixes image orientation according to image's EXIF metadata.
 
 Dependencies
