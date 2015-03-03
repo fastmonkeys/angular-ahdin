@@ -6,11 +6,7 @@
     "Roope Hovi <roope.hovi@gmail.com>"
   ],
   "description": "Image file compression service for AngularJS applications",
-  "main": [
-    "dist/libs/load-image.all.min.js",
-    "dist/libs/blob-util.min.js",
-    "dist/ahdin.js"
-  ],
+  "main": "dist/ahdin.js",
   "moduleType": [
     "globals"
   ],
