@@ -30,11 +30,17 @@
       var imageDeferred = $q.defer();
       var image = new Image();
       image.onload = resolveImage;
+      image.onerror = rejectImage;
       image.src = blobUtil.createObjectURL(params.sourceFile);
       return imageDeferred.promise;
 
       function resolveImage() {
         imageDeferred.resolve(image);
+        $rootScope.$apply();
+      }
+      
+      function rejectImage(err) {
+        imageDeferred.reject(err, image);
         $rootScope.$apply();
       }
     }
