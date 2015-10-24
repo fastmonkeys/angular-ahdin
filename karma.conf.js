@@ -9,7 +9,11 @@ module.exports = function(config) {
       'bower_components/blueimp-load-image/js/load-image.all.min.js',
       'src/*.js',
       'test/*.js',
-      {pattern: 'test/test-image.jpg', watched: false, included: false}
+      {
+        pattern: 'test/*.{jpg,png}',
+        watched: false,
+        included: false
+      }
     ],
     frameworks: ['jasmine', 'angular-filesort'],
     angularFilesort: {

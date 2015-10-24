@@ -121,118 +121,128 @@ describe('Ahdin factory', function() {
   });
 
   describe('image compression', function() {
-    var imageBlob;
-    var ORIGINAL_WIDTH;
-    var ORIGINAL_HEIGHT;
+    describe('jpeg', function() {
+      makeImageCompressionTest('/base/test/test-image.jpg', 'image/jpeg');
+    });
 
-    beforeAll(function(done) {
-      getImageFromSrc('/base/test/test-image.jpg', function(image) {
-        ORIGINAL_WIDTH = image.width;
-        ORIGINAL_HEIGHT = image.height;
-        getBlobFromImage(image, 'image/jpeg', function(blob) {
-          imageBlob = blob;
+    describe('png', function() {
+      makeImageCompressionTest('/base/test/test-image.png', 'image/png');
+    });
+
+    function makeImageCompressionTest(imageSrc, mimeType) {
+      var imageBlob;
+      var ORIGINAL_WIDTH;
+      var ORIGINAL_HEIGHT;
+
+      beforeAll(function(done) {
+        getImageFromSrc(imageSrc, function(image) {
+          ORIGINAL_WIDTH = image.width;
+          ORIGINAL_HEIGHT = image.height;
+          getBlobFromImage(image, mimeType, function(blob) {
+            imageBlob = blob;
+            done();
+          });
+        });
+      });
+
+      it('should make image file smaller', function(done) {
+        var originalSize = imageBlob.size;
+        var imageCompression = Ahdin.compress({
+          sourceFile: imageBlob
+        });
+
+        imageCompression.then(function(compressedFile) {
+          expect(compressedFile.size < originalSize).toBe(true);
           done();
         });
       });
-    });
 
-    it('should make image file smaller', function(done) {
-      var originalSize = imageBlob.size;
-      var imageCompression = Ahdin.compress({
-        sourceFile: imageBlob
+      it('should honor the given maximum width', function(done) {
+        var compression = Ahdin.compress({
+          sourceFile: imageBlob,
+          maxWidth: 1000
+        });
+
+        compression.then(function(compressedFile) {
+          var compressedImg = new Image();
+          compressedImg.onload = function() {
+            var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+            expect(compressedImg.width).toBe(1000);
+            expect(compressedImg.height).toBe(compressedImg.width / aspectRatio);
+            done();
+          };
+          compressedImg.src = blobUtil.createObjectURL(compressedFile);
+        });
       });
 
-      imageCompression.then(function(compressedFile) {
-        expect(compressedFile.size < originalSize).toBe(true);
-        done();
-      });
-    });
+      it('should honor the given maximum height', function(done) {
+        var compression = Ahdin.compress({
+          sourceFile: imageBlob,
+          maxHeight: 300
+        });
 
-    it('should honor the given maximum width', function(done) {
-      var compression = Ahdin.compress({
-        sourceFile: imageBlob,
-        maxWidth: 1000
+        compression.then(function(compressedFile) {
+          var compressed = new Image();
+          compressed.onload = function() {
+            var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+            expect(compressed.height).toBe(300);
+            expect(compressed.width).toBe(compressed.height * aspectRatio);
+            done();
+          };
+          compressed.src = blobUtil.createObjectURL(compressedFile);
+        });
       });
 
-      compression.then(function(compressedFile) {
-        var compressedImg = new Image();
-        compressedImg.onload = function() {
-          var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
-          expect(compressedImg.width).toBe(1000);
-          expect(compressedImg.height).toBe(compressedImg.width / aspectRatio);
+      it('should honor the height rule when it is stronger', function(done) {
+        var compression = Ahdin.compress({
+          sourceFile: imageBlob,
+          maxWidth: ORIGINAL_WIDTH * 0.9,
+          maxHeight: ORIGINAL_HEIGHT * 0.5
+        });
+
+        compression.then(function(compressedFile) {
+          var compressed = new Image();
+          compressed.onload = function() {
+            var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+            expect(compressed.height).toBe(ORIGINAL_HEIGHT * 0.5);
+            expect(compressed.width).not.toBe(ORIGINAL_WIDTH * 0.9);
+            expect(compressed.width).toBe(compressed.height * aspectRatio);
+            done();
+          };
+          compressed.src = blobUtil.createObjectURL(compressedFile);
+        });
+      });
+
+      it('should honor the width rule when it is stronger', function(done) {
+        var compression = Ahdin.compress({
+          sourceFile: imageBlob,
+          maxWidth: ORIGINAL_WIDTH * 0.1,
+          maxHeight: ORIGINAL_HEIGHT * 0.9
+        });
+
+        compression.then(function(compressedFile) {
+          var compressed = new Image();
+          compressed.onload = function() {
+            var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+            expect(compressed.width).toBe(ORIGINAL_WIDTH * 0.1);
+            expect(compressed.height).not.toBe(ORIGINAL_HEIGHT * 0.9);
+            expect(compressed.height).toBe(compressed.width / aspectRatio);
+            done();
+          };
+          compressed.src = blobUtil.createObjectURL(compressedFile);
+        });
+      });
+
+      it('should preserve file name', function(done) {
+        var compression = Ahdin.compress({
+          sourceFile: imageBlob
+        });
+        compression.then(function(compressedFile) {
+          expect(compressedFile.name).toBe(imageBlob.name);
           done();
-        };
-        compressedImg.src = blobUtil.createObjectURL(compressedFile);
+        });
       });
-    });
-
-    it('should honor the given maximum height', function(done) {
-      var compression = Ahdin.compress({
-        sourceFile: imageBlob,
-        maxHeight: 300
-      });
-
-      compression.then(function(compressedFile) {
-        var compressed = new Image();
-        compressed.onload = function() {
-          var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
-          expect(compressed.height).toBe(300);
-          expect(compressed.width).toBe(compressed.height * aspectRatio);
-          done();
-        };
-        compressed.src = blobUtil.createObjectURL(compressedFile);
-      });
-    });
-
-    it('should honor the height rule when it is stronger', function(done) {
-      var compression = Ahdin.compress({
-        sourceFile: imageBlob,
-        maxWidth: ORIGINAL_WIDTH * 0.9,
-        maxHeight: ORIGINAL_HEIGHT * 0.5
-      });
-
-      compression.then(function(compressedFile) {
-        var compressed = new Image();
-        compressed.onload = function() {
-          var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
-          expect(compressed.height).toBe(ORIGINAL_HEIGHT * 0.5);
-          expect(compressed.width).not.toBe(ORIGINAL_WIDTH * 0.9);
-          expect(compressed.width).toBe(compressed.height * aspectRatio);
-          done();
-        };
-        compressed.src = blobUtil.createObjectURL(compressedFile);
-      });
-    });
-
-    it('should honor the width rule when it is stronger', function(done) {
-      var compression = Ahdin.compress({
-        sourceFile: imageBlob,
-        maxWidth: ORIGINAL_WIDTH * 0.1,
-        maxHeight: ORIGINAL_HEIGHT * 0.9
-      });
-
-      compression.then(function(compressedFile) {
-        var compressed = new Image();
-        compressed.onload = function() {
-          var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
-          expect(compressed.width).toBe(ORIGINAL_WIDTH * 0.1);
-          expect(compressed.height).not.toBe(ORIGINAL_HEIGHT * 0.9);
-          expect(compressed.height).toBe(compressed.width / aspectRatio);
-          done();
-        };
-        compressed.src = blobUtil.createObjectURL(compressedFile);
-      });
-    });
-
-    it('should preserve file name', function(done) {
-      var compression = Ahdin.compress({
-        sourceFile: imageBlob
-      });
-      compression.then(function(compressedFile) {
-        expect(compressedFile.name).toBe(imageBlob.name);
-        done();
-      });
-    });
+    }
   });
 
   function getImageFromSrc(src, callback) {
