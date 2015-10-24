@@ -7,8 +7,8 @@ Lossy compression module for AngularJS applications. It takes image `File`s or `
 Dependencies
 ------------
 - AngularJS >=1.2.*
-- [blob-util](https://github.com/nolanlawson/blob-util) (comes blundled with angular-ahdin)
-- [load-image](https://github.com/blueimp/JavaScript-Load-Image) (comes blundled with angular-ahdin)
+- [blob-util](https://github.com/nolanlawson/blob-util) (comes bundled with angular-ahdin)
+- [load-image](https://github.com/blueimp/JavaScript-Load-Image) (comes bundled with angular-ahdin)
 
 Installation
 ------------
