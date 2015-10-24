@@ -5,19 +5,19 @@ angular-ahdin
 Lossy compression module for AngularJS applications. It takes image `File`s or `Blob`s and compresses them to `Blob`s. It also fixes image orientation according to image's EXIF metadata.
 
 Dependencies
------
+------------
 - AngularJS >=1.2.*
 - [blob-util](https://github.com/nolanlawson/blob-util) (comes blundled with angular-ahdin)
 - [load-image](https://github.com/blueimp/JavaScript-Load-Image) (comes blundled with angular-ahdin)
 
 Installation
------------
+------------
 ```
 $ bower install --save angular-ahdin
 ```
 
 Setting up the module
-----------
+---------------------
 After installing the package make sure that the module `ahdin` is defined as your app's dependency.
 
 ```html
@@ -32,7 +32,7 @@ After installing the package make sure that the module `ahdin` is defined as you
 ```
 
 How to use Ahdin
-----------
+----------------
 In order to to compress images, inject `Ahdin` to your module and call `compress()`. Function returns a promise that will be resolved with compressed image `Blob`.
 
 ```js
