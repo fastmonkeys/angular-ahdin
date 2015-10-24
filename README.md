@@ -27,8 +27,7 @@ After installing the package make sure that the module `ahdin` is defined as you
 
 <script>
   angular.module('yourAwesomeApp', ['ahdin']);
-<script>
-
+</script>
 ```
 
 How to use Ahdin
