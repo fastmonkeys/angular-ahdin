@@ -21,44 +21,29 @@
     function compress(params) {
       validateParams(params);
       quality = params.quality || QUALITY;
-      function imageMetadataParsing(image) { return parseMetadata(image, params) }
-      function scalingAndOrientation(args) { return scaleAndFixOrientation(args, params) }
+      function scalingAndOrientation(metaData) { return scaleAndFixOrientation(metaData, params) }
       function qualityDecreasedDataUrl(image) { return decreaseImageQuality(image, params) }
 
-      return blobToImage(params)
-        .then(imageMetadataParsing)
+      return parseMetaData(params)
         .then(scalingAndOrientation)
         .then(qualityDecreasedDataUrl)
         .then(dataUrlToBlob);
     }
 
-    function blobToImage(params) {
-      var imageDeferred = $q.defer();
-      var image = new Image();
-      image.onload = resolveImage;
-      image.src = blobUtil.createObjectURL(params.sourceFile);
-      return imageDeferred.promise;
-
-      function resolveImage() {
-        imageDeferred.resolve(image);
-        $rootScope.$apply();
-      }
-    }
-
-    function parseMetadata(image, params) {
+    function parseMetaData(params) {
       var deferred = $q.defer();
-      loadImage.parseMetaData(params.sourceFile, resolveExtendedMetadata, params);
+      loadImage.parseMetaData(params.sourceFile, resolveExtendedMetaData, params);
       return deferred.promise;
 
-      function resolveExtendedMetadata(metaData) {
-        deferred.resolve({metaData: metaData, image: image});
+      function resolveExtendedMetaData(metaData) {
+        deferred.resolve(metaData);
         $rootScope.$apply();
       }
     }
 
-    function scaleAndFixOrientation(args, params) {
+    function scaleAndFixOrientation(metaData, params) {
       var deferred = $q.defer();
-      var options = parseOptions(args, params);
+      var options = parseOptions(metaData, params);
       loadImage(params.sourceFile, resolveDeferred, options);
       return deferred.promise;
 
@@ -68,14 +53,10 @@
       }
     }
 
-    function parseOptions(args, params) {
-      var image = args.image;
-      var metaData = args.metaData;
-      var maxHeight = (params && params.maxHeight) || image.height;
-      var maxWidth = (params && params.maxWidth) || image.width;
+    function parseOptions(metaData, params) {
       var options = {
-        maxWidth: maxWidth,
-        maxHeight: maxHeight
+        maxWidth: params.maxWidth,
+        maxHeight: params.maxHeight
       };
 
       if (metaData.exif) {
