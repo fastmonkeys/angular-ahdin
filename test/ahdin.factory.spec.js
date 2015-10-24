@@ -72,13 +72,22 @@ describe('Ahdin factory', function() {
     });
 
     describe('with valid parameters', function() {
+      var sourceFile;
+
+      beforeEach(function(done) {
+        getBlobFromSrc('/base/test/test-image.jpg', 'image/jpeg', function(blob) {
+          sourceFile = blob;
+          done();
+        });
+      });
+
       it('should not throw error if valid source image', function() {
-        params = {sourceFile: new $window.File([], 'file')};
+        params = {sourceFile: sourceFile};
         expect(imageCompressorTest()).not.toThrow(jasmine.any(Error));
       });
 
       it('should not throw error if max width is given', function() {
-        params = {sourceFile: new $window.File([], 'file'), maxWidth: 0.1};
+        params = {sourceFile: sourceFile, maxWidth: 0.1};
         expect(imageCompressorTest()).not.toThrow(jasmine.any(Error));
 
         params.maxWidth = 999;
@@ -86,7 +95,7 @@ describe('Ahdin factory', function() {
       });
 
       it('should not throw error if max height is given', function() {
-        params = {sourceFile: new $window.File([], 'file'), maxHeight: 0.1};
+        params = {sourceFile: sourceFile, maxHeight: 0.1};
         expect(imageCompressorTest()).not.toThrow(jasmine.any(Error));
 
         params.maxHeight = 999;
@@ -94,7 +103,7 @@ describe('Ahdin factory', function() {
       });
 
       it('should not throw error if valid output format is given', function() {
-        params = {sourceFile: new $window.File([], 'file'), outputFormat: 'jpeg'};
+        params = {sourceFile: sourceFile, outputFormat: 'jpeg'};
         expect(imageCompressorTest()).not.toThrow(jasmine.any(Error));
 
         params.outputFormat = 'png';
@@ -102,7 +111,7 @@ describe('Ahdin factory', function() {
       });
 
       it('should not throw error if valid quality is given', function() {
-        params = {sourceFile: new $window.File([], 'file'), quality: 0.1};
+        params = {sourceFile: sourceFile, quality: 0.1};
         expect(imageCompressorTest()).not.toThrow(jasmine.any(Error));
 
         params.quality = 1;
@@ -112,27 +121,19 @@ describe('Ahdin factory', function() {
   });
 
   describe('image compression', function() {
-    var image;
     var imageBlob;
     var ORIGINAL_WIDTH;
     var ORIGINAL_HEIGHT;
+
     beforeAll(function(done) {
-      image = new Image();
-      image.onload = function() {
+      getImageFromSrc('/base/test/test-image.jpg', function(image) {
         ORIGINAL_WIDTH = image.width;
         ORIGINAL_HEIGHT = image.height;
-
-        var canvas = $window.document.createElement('canvas');
-        canvas.width = image.width;
-        canvas.height = image.height;
-        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
-        blobUtil.dataURLToBlob(canvas.toDataURL('image/jpeg', 1)).then(function(blob) {
+        getBlobFromImage(image, 'image/jpeg', function(blob) {
           imageBlob = blob;
-          imageBlob.name = 'test-image.jpg';
           done();
         });
-      };
-      image.src = '/base/test/test-image.jpg';
+      });
     });
 
     it('should make image file smaller', function(done) {
@@ -233,4 +234,28 @@ describe('Ahdin factory', function() {
       });
     });
   });
+
+  function getImageFromSrc(src, callback) {
+    var image = new Image();
+    image.onload = function() {
+      callback(image);
+    };
+    image.src = src;
+  }
+
+  function getBlobFromImage(image, mimeType, callback) {
+    var canvas = $window.document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+    blobUtil.dataURLToBlob(canvas.toDataURL(mimeType, 1)).then(function(blob) {
+      callback(blob);
+    });
+  }
+
+  function getBlobFromSrc(src, mimeType, callback) {
+    getImageFromSrc(src, function(image) {
+      getBlobFromImage(image, mimeType, callback);
+    });
+  }
 });
