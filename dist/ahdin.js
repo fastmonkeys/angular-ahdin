@@ -43,7 +43,7 @@
 
     function scaleAndFixOrientation(metaData, params) {
       var deferred = $q.defer();
-      var options = parseOptions(metaData, params);
+      var options = getLoadImageOptions(metaData, params);
       loadImage(params.sourceFile, resolveDeferred, options);
       return deferred.promise;
 
@@ -53,7 +53,7 @@
       }
     }
 
-    function parseOptions(metaData, params) {
+    function getLoadImageOptions(metaData, params) {
       var options = {
         canvas: true,
         maxWidth: params.maxWidth,
