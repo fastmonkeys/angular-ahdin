@@ -16,7 +16,7 @@
       validateParams(params);
       quality = params.quality || QUALITY;
       function scalingAndOrientation(metaData) { return scaleAndFixOrientation(metaData, params) }
-      function qualityDecreasedDataUrl(image) { return decreaseImageQuality(image, params) }
+      function qualityDecreasedDataUrl(canvas) { return decreaseImageQuality(canvas, params) }
 
       return parseMetaData(params)
         .then(scalingAndOrientation)
@@ -41,14 +41,15 @@
       loadImage(params.sourceFile, resolveDeferred, options);
       return deferred.promise;
 
-      function resolveDeferred(image) {
-        deferred.resolve(image);
+      function resolveDeferred(canvas) {
+        deferred.resolve(canvas);
         $rootScope.$apply();
       }
     }
 
     function parseOptions(metaData, params) {
       var options = {
+        canvas: true,
         maxWidth: params.maxWidth,
         maxHeight: params.maxHeight
       };
@@ -60,14 +61,10 @@
       return options;
     }
 
-    function decreaseImageQuality(image, params) {
+    function decreaseImageQuality(canvas, params) {
       var deferred = $q.defer();
       var format = (params && params.outputFormat) || 'jpeg';
       var mimeType = 'image/' + format;
-      var canvas = $window.document.createElement('canvas');
-      canvas.width = image.width;
-      canvas.height = image.height;
-      canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
       var resolveData = {
         dataUrl: canvas.toDataURL(mimeType, quality),
         fileName: params.sourceFile.name
