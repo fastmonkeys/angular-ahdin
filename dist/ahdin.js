@@ -12,7 +12,6 @@
 
   function imageCompressor($q, $window, $rootScope, loadImage, blobUtil, QUALITY) {
     var VALID_FORMATS = ['jpeg', 'png'];
-    var quality;
 
     return {
       compress: compress
@@ -20,79 +19,57 @@
 
     function compress(params) {
       validateParams(params);
-      quality = params.quality || QUALITY;
-      function scalingAndOrientation(metaData) { return scaleAndFixOrientation(metaData, params) }
-      function qualityDecreasedDataUrl(canvas) { return decreaseImageQuality(canvas, params) }
 
-      return parseMetaData(params)
-        .then(scalingAndOrientation)
-        .then(qualityDecreasedDataUrl)
-        .then(dataUrlToBlob);
-    }
+      params.quality = params.quality || QUALITY;
+      params.outputFormat = params.outputFormat || 'jpeg';
 
-    function parseMetaData(params) {
       var deferred = $q.defer();
-      loadImage.parseMetaData(params.sourceFile, resolveExtendedMetaData, params);
+      scaleAndFixOrientation(canvasToBlobAndResolve);
       return deferred.promise;
 
-      function resolveExtendedMetaData(metaData) {
-        deferred.resolve(metaData);
-        $rootScope.$apply();
-      }
-    }
-
-    function scaleAndFixOrientation(metaData, params) {
-      var deferred = $q.defer();
-      var options = getLoadImageOptions(metaData, params);
-      loadImage(params.sourceFile, resolveDeferred, options);
-      return deferred.promise;
-
-      function resolveDeferred(canvas) {
-        deferred.resolve(canvas);
-        $rootScope.$apply();
-      }
-    }
-
-    function getLoadImageOptions(metaData, params) {
-      var options = {
-        canvas: true,
-        maxWidth: params.maxWidth,
-        maxHeight: params.maxHeight
-      };
-
-      if (metaData.exif) {
-        options.orientation = metaData.exif.get('Orientation');
+      function scaleAndFixOrientation(callback) {
+        getLoadImageOptions(function(options) {
+          loadImage(params.sourceFile, callback, options);
+        });
       }
 
-      return options;
-    }
+      function getLoadImageOptions(callback) {
+        loadImage.parseMetaData(params.sourceFile, function(metaData) {
+          var options = {
+            canvas: true,
+            maxWidth: params.maxWidth,
+            maxHeight: params.maxHeight
+          };
 
-    function decreaseImageQuality(canvas, params) {
-      var deferred = $q.defer();
-      var format = (params && params.outputFormat) || 'jpeg';
-      var mimeType = 'image/' + format;
-      var resolveData = {
-        dataUrl: canvas.toDataURL(mimeType, quality),
-        fileName: params.sourceFile.name
-      };
-      deferred.resolve(resolveData);
-      return deferred.promise;
-    }
+          if (metaData.exif) {
+            options.orientation = metaData.exif.get('Orientation');
+          }
 
-    function dataUrlToBlob(args) {
-      var deferred = $q.defer();
-      var compressedBlob = blobUtil.dataURLToBlob(args.dataUrl);
-      compressedBlob.then(addFileName);
+          callback(options);
+        });
+      }
 
-      deferred.resolve(compressedBlob);
-      $window.setTimeout(function() {
-        $rootScope.$apply();
-      });
+      function canvasToBlobAndResolve(canvas) {
+        canvasToBlob(canvas, applyAndResolve);
+      }
 
-      return deferred.promise;
+      function canvasToBlob(canvas, callback) {
+        var mimeType = 'image/' + params.outputFormat;
+        var dataUrl = canvas.toDataURL(mimeType, params.quality);
+        blobUtil.dataURLToBlob(dataUrl).then(addFileName).then(callback);
+      }
 
       function addFileName(blob) {
-        blob.name = args.fileName;
+        blob.name = params.sourceFile.name;
+        return blob;
+      }
+
+      function applyAndResolve(blob) {
+        $rootScope.$apply(resolve);
+
+        function resolve() {
+          deferred.resolve(blob);
+        }
       }
     }
 
