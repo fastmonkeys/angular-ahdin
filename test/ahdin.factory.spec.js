@@ -72,13 +72,22 @@ describe('Ahdin factory', function() {
     });
 
     describe('with valid parameters', function() {
+      var sourceFile;
+
+      beforeEach(function(done) {
+        getBlobFromSrc('/base/test/test-image.jpg', 'image/jpeg', function(blob) {
+          sourceFile = blob;
+          done();
+        });
+      });
+
       it('should not throw error if valid source image', function() {
-        params = {sourceFile: new $window.File([], 'file')};
+        params = {sourceFile: sourceFile};
         expect(imageCompressorTest()).not.toThrow(jasmine.any(Error));
       });
 
       it('should not throw error if max width is given', function() {
-        params = {sourceFile: new $window.File([], 'file'), maxWidth: 0.1};
+        params = {sourceFile: sourceFile, maxWidth: 0.1};
         expect(imageCompressorTest()).not.toThrow(jasmine.any(Error));
 
         params.maxWidth = 999;
@@ -86,7 +95,7 @@ describe('Ahdin factory', function() {
       });
 
       it('should not throw error if max height is given', function() {
-        params = {sourceFile: new $window.File([], 'file'), maxHeight: 0.1};
+        params = {sourceFile: sourceFile, maxHeight: 0.1};
         expect(imageCompressorTest()).not.toThrow(jasmine.any(Error));
 
         params.maxHeight = 999;
@@ -94,7 +103,7 @@ describe('Ahdin factory', function() {
       });
 
       it('should not throw error if valid output format is given', function() {
-        params = {sourceFile: new $window.File([], 'file'), outputFormat: 'jpeg'};
+        params = {sourceFile: sourceFile, outputFormat: 'jpeg'};
         expect(imageCompressorTest()).not.toThrow(jasmine.any(Error));
 
         params.outputFormat = 'png';
@@ -102,7 +111,7 @@ describe('Ahdin factory', function() {
       });
 
       it('should not throw error if valid quality is given', function() {
-        params = {sourceFile: new $window.File([], 'file'), quality: 0.1};
+        params = {sourceFile: sourceFile, quality: 0.1};
         expect(imageCompressorTest()).not.toThrow(jasmine.any(Error));
 
         params.quality = 1;
@@ -112,125 +121,151 @@ describe('Ahdin factory', function() {
   });
 
   describe('image compression', function() {
-    var image;
-    var imageBlob;
-    var ORIGINAL_WIDTH;
-    var ORIGINAL_HEIGHT;
-    beforeAll(function(done) {
-      image = new Image();
-      image.onload = function() {
-        ORIGINAL_WIDTH = image.width;
-        ORIGINAL_HEIGHT = image.height;
+    describe('jpeg', function() {
+      makeImageCompressionTest('/base/test/test-image.jpg', 'image/jpeg');
+    });
 
-        var canvas = $window.document.createElement('canvas');
-        canvas.width = image.width;
-        canvas.height = image.height;
-        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
-        blobUtil.dataURLToBlob(canvas.toDataURL('image/jpeg', 1)).then(function(blob) {
-          imageBlob = blob;
-          imageBlob.name = 'test-image.jpg';
+    describe('png', function() {
+      makeImageCompressionTest('/base/test/test-image.png', 'image/png');
+    });
+
+    function makeImageCompressionTest(imageSrc, mimeType) {
+      var imageBlob;
+      var ORIGINAL_WIDTH;
+      var ORIGINAL_HEIGHT;
+
+      beforeAll(function(done) {
+        getImageFromSrc(imageSrc, function(image) {
+          ORIGINAL_WIDTH = image.width;
+          ORIGINAL_HEIGHT = image.height;
+          getBlobFromImage(image, mimeType, function(blob) {
+            imageBlob = blob;
+            done();
+          });
+        });
+      });
+
+      it('should make image file smaller', function(done) {
+        var originalSize = imageBlob.size;
+        var imageCompression = Ahdin.compress({
+          sourceFile: imageBlob
+        });
+
+        imageCompression.then(function(compressedFile) {
+          expect(compressedFile.size < originalSize).toBe(true);
           done();
         });
-      };
-      image.src = '/base/test/test-image.jpg';
-    });
-
-    it('should make image file smaller', function(done) {
-      var originalSize = imageBlob.size;
-      var imageCompression = Ahdin.compress({
-        sourceFile: imageBlob
       });
 
-      imageCompression.then(function(compressedFile) {
-        expect(compressedFile.size < originalSize).toBe(true);
-        done();
-      });
-    });
+      it('should honor the given maximum width', function(done) {
+        var compression = Ahdin.compress({
+          sourceFile: imageBlob,
+          maxWidth: 1000
+        });
 
-    it('should honor the given maximum width', function(done) {
-      var compression = Ahdin.compress({
-        sourceFile: imageBlob,
-        maxWidth: 1000
+        compression.then(function(compressedFile) {
+          var compressedImg = new Image();
+          compressedImg.onload = function() {
+            var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+            expect(compressedImg.width).toBe(1000);
+            expect(compressedImg.height).toBe(compressedImg.width / aspectRatio);
+            done();
+          };
+          compressedImg.src = blobUtil.createObjectURL(compressedFile);
+        });
       });
 
-      compression.then(function(compressedFile) {
-        var compressedImg = new Image();
-        compressedImg.onload = function() {
-          var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
-          expect(compressedImg.width).toBe(1000);
-          expect(compressedImg.height).toBe(compressedImg.width / aspectRatio);
+      it('should honor the given maximum height', function(done) {
+        var compression = Ahdin.compress({
+          sourceFile: imageBlob,
+          maxHeight: 300
+        });
+
+        compression.then(function(compressedFile) {
+          var compressed = new Image();
+          compressed.onload = function() {
+            var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+            expect(compressed.height).toBe(300);
+            expect(compressed.width).toBe(compressed.height * aspectRatio);
+            done();
+          };
+          compressed.src = blobUtil.createObjectURL(compressedFile);
+        });
+      });
+
+      it('should honor the height rule when it is stronger', function(done) {
+        var compression = Ahdin.compress({
+          sourceFile: imageBlob,
+          maxWidth: ORIGINAL_WIDTH * 0.9,
+          maxHeight: ORIGINAL_HEIGHT * 0.5
+        });
+
+        compression.then(function(compressedFile) {
+          var compressed = new Image();
+          compressed.onload = function() {
+            var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+            expect(compressed.height).toBe(ORIGINAL_HEIGHT * 0.5);
+            expect(compressed.width).not.toBe(ORIGINAL_WIDTH * 0.9);
+            expect(compressed.width).toBe(compressed.height * aspectRatio);
+            done();
+          };
+          compressed.src = blobUtil.createObjectURL(compressedFile);
+        });
+      });
+
+      it('should honor the width rule when it is stronger', function(done) {
+        var compression = Ahdin.compress({
+          sourceFile: imageBlob,
+          maxWidth: ORIGINAL_WIDTH * 0.1,
+          maxHeight: ORIGINAL_HEIGHT * 0.9
+        });
+
+        compression.then(function(compressedFile) {
+          var compressed = new Image();
+          compressed.onload = function() {
+            var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+            expect(compressed.width).toBe(ORIGINAL_WIDTH * 0.1);
+            expect(compressed.height).not.toBe(ORIGINAL_HEIGHT * 0.9);
+            expect(compressed.height).toBe(compressed.width / aspectRatio);
+            done();
+          };
+          compressed.src = blobUtil.createObjectURL(compressedFile);
+        });
+      });
+
+      it('should preserve file name', function(done) {
+        var compression = Ahdin.compress({
+          sourceFile: imageBlob
+        });
+        compression.then(function(compressedFile) {
+          expect(compressedFile.name).toBe(imageBlob.name);
           done();
-        };
-        compressedImg.src = blobUtil.createObjectURL(compressedFile);
+        });
       });
-    });
-
-    it('should honor the given maximum height', function(done) {
-      var compression = Ahdin.compress({
-        sourceFile: imageBlob,
-        maxHeight: 300
-      });
-
-      compression.then(function(compressedFile) {
-        var compressed = new Image();
-        compressed.onload = function() {
-          var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
-          expect(compressed.height).toBe(300);
-          expect(compressed.width).toBe(compressed.height * aspectRatio);
-          done();
-        };
-        compressed.src = blobUtil.createObjectURL(compressedFile);
-      });
-    });
-
-    it('should honor the height rule when it is stronger', function(done) {
-      var compression = Ahdin.compress({
-        sourceFile: imageBlob,
-        maxWidth: ORIGINAL_WIDTH * 0.9,
-        maxHeight: ORIGINAL_HEIGHT * 0.5
-      });
-
-      compression.then(function(compressedFile) {
-        var compressed = new Image();
-        compressed.onload = function() {
-          var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
-          expect(compressed.height).toBe(ORIGINAL_HEIGHT * 0.5);
-          expect(compressed.width).not.toBe(ORIGINAL_WIDTH * 0.9);
-          expect(compressed.width).toBe(compressed.height * aspectRatio);
-          done();
-        };
-        compressed.src = blobUtil.createObjectURL(compressedFile);
-      });
-    });
-
-    it('should honor the width rule when it is stronger', function(done) {
-      var compression = Ahdin.compress({
-        sourceFile: imageBlob,
-        maxWidth: ORIGINAL_WIDTH * 0.1,
-        maxHeight: ORIGINAL_HEIGHT * 0.9
-      });
-
-      compression.then(function(compressedFile) {
-        var compressed = new Image();
-        compressed.onload = function() {
-          var aspectRatio = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
-          expect(compressed.width).toBe(ORIGINAL_WIDTH * 0.1);
-          expect(compressed.height).not.toBe(ORIGINAL_HEIGHT * 0.9);
-          expect(compressed.height).toBe(compressed.width / aspectRatio);
-          done();
-        };
-        compressed.src = blobUtil.createObjectURL(compressedFile);
-      });
-    });
-
-    it('should preserve file name', function(done) {
-      var compression = Ahdin.compress({
-        sourceFile: imageBlob
-      });
-      compression.then(function(compressedFile) {
-        expect(compressedFile.name).toBe(imageBlob.name);
-        done();
-      });
-    });
+    }
   });
+
+  function getImageFromSrc(src, callback) {
+    var image = new Image();
+    image.onload = function() {
+      callback(image);
+    };
+    image.src = src;
+  }
+
+  function getBlobFromImage(image, mimeType, callback) {
+    var canvas = $window.document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+    blobUtil.dataURLToBlob(canvas.toDataURL(mimeType, 1)).then(function(blob) {
+      callback(blob);
+    });
+  }
+
+  function getBlobFromSrc(src, mimeType, callback) {
+    getImageFromSrc(src, function(image) {
+      getBlobFromImage(image, mimeType, callback);
+    });
+  }
 });
