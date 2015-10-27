@@ -21,9 +21,9 @@ Setting up the module
 After installing the package make sure that the module `ahdin` is defined as your app's dependency.
 
 ```html
-<script href="bower_components/angular-ahdin/dist/blob-util.min.js"></script>
-<script href="bower_components/angular-ahdin/dist/load-image.all.min.js"></script>
-<script href="bower_components/angular-ahdin/dist/ahdin.js"></script>
+<script src="bower_components/angular-ahdin/dist/blob-util.min.js"></script>
+<script src="bower_components/angular-ahdin/dist/load-image.all.min.js"></script>
+<script src="bower_components/angular-ahdin/dist/ahdin.js"></script>
 
 <script>
   angular.module('yourAwesomeApp', ['ahdin']);
