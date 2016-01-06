@@ -123,6 +123,7 @@
       }
     }
   }
+  imageCompressor.$inject = ["$q", "$window", "$rootScope", "loadImage", "blobUtil", "QUALITY"];
 })();
 
 (function() {

@@ -12,9 +12,9 @@ gulp.task('test', function (done) {
 gulp.task('scripts', ['clean', 'deps'], function() {
   return gulp.src('src/*.js')
     .pipe(plugins.angularFilesort())
+    .pipe(plugins.ngAnnotate())
     .pipe(plugins.concat('ahdin.js'))
     .pipe(gulp.dest('dist'))
-    .pipe(plugins.ngAnnotate())
     .pipe(plugins.uglify())
     .pipe(plugins.rename('ahdin.min.js'))
     .pipe(gulp.dest('dist'));
