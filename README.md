@@ -57,17 +57,17 @@ Parameter object that is passed to function `compress()` can have the following 
 var parameterObj = {
   // jpeg or png file that is instance of File or Blob
   sourceFile: file, // required
-  
+
   // Maximum width of compressed photo in pixels
   maxWidth: 1000, // optional, defaults to original image width
-  
+
   // Maximum height of compressed photo in pixels
   maxHeight: 1000, // optional, defaults to original image height
-  
+
   // String defining compressed file mime type. Accepted values: 'jpeg' and 'png'
   outputFormat: 'png' // optional, default value 'jpeg'
-  
-  // Image quality when desired outputFormat is 'jpeg' or undefined. Take values 
+
+  // Image quality when desired outputFormat is 'jpeg' or undefined. Take values
   // over 0 and less or equal to 1. If outputFormat is 'png' this has no effect.
   quality: 0.9 // optional, defaults to 0.8
 };
