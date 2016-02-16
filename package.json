@@ -24,7 +24,10 @@
   },
   "scripts": {
     "build": "webpack",
-    "test": "karma start"
+    "test": "karma start",
+    "preversion": "npm test",
+    "version": "npm run build && git add dist",
+    "postversion": "git push --tags origin master && npm publish"
   },
   "repository": {
     "type": "git",
