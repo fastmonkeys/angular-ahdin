@@ -1,123 +1,131 @@
-(function() {
-  'use strict';
-  angular
-    .module('ahdin', [])
-    .constant('blobUtil', blobUtil)
-    .constant('loadImage', loadImage)
-    .constant('QUALITY', 0.8)
-    .factory('Ahdin', imageCompressor);
+'use strict';
 
-  function imageCompressor($q, $window, $rootScope, loadImage, blobUtil, QUALITY) {
-    var VALID_FORMATS = ['jpeg', 'png'];
+var angular = require('angular');
+var blobUtil = require('blob-util');
+var loadImage = require('blueimp-load-image/js/load-image');
 
-    return {
-      compress: compress
-    };
+require('blueimp-load-image/js/load-image-orientation');
+require('blueimp-load-image/js/load-image-meta');
+require('blueimp-load-image/js/load-image-exif');
+require('blueimp-load-image/js/load-image-exif-map');
 
-    function compress(params) {
-      validateParams(params);
+module.exports = angular
+  .module('ahdin', [])
+  .factory('Ahdin', imageCompressor);
 
-      params.quality = params.quality || QUALITY;
-      params.outputFormat = params.outputFormat || 'jpeg';
+function imageCompressor($q, $window, $rootScope) {
+  var VALID_FORMATS = ['jpeg', 'png'];
+  var DEFAULT_QUALITY = 0.8;
 
-      var deferred = $q.defer();
-      scaleAndFixOrientation(canvasToBlobAndResolve);
-      return deferred.promise;
+  return {
+    compress: compress
+  };
 
-      function scaleAndFixOrientation(callback) {
-        getLoadImageOptions(function(options) {
-          loadImage(params.sourceFile, callback, options);
-        });
-      }
+  function compress(params) {
+    validateParams(params);
 
-      function getLoadImageOptions(callback) {
-        loadImage.parseMetaData(params.sourceFile, function(metaData) {
-          var options = {
-            canvas: true,
-            maxWidth: params.maxWidth,
-            maxHeight: params.maxHeight
-          };
+    params.quality = params.quality || DEFAULT_QUALITY;
+    params.outputFormat = params.outputFormat || 'jpeg';
 
-          if (metaData.exif) {
-            options.orientation = metaData.exif.get('Orientation');
-          }
+    var deferred = $q.defer();
+    scaleAndFixOrientation(canvasToBlobAndResolve);
+    return deferred.promise;
 
-          callback(options);
-        });
-      }
+    function scaleAndFixOrientation(callback) {
+      getLoadImageOptions(function(options) {
+        loadImage(params.sourceFile, callback, options);
+      });
+    }
 
-      function canvasToBlobAndResolve(canvas) {
-        canvasToBlob(canvas, applyAndResolve);
-      }
+    function getLoadImageOptions(callback) {
+      loadImage.parseMetaData(params.sourceFile, function(metaData) {
+        var options = {
+          canvas: true,
+          maxWidth: params.maxWidth,
+          maxHeight: params.maxHeight
+        };
 
-      function canvasToBlob(canvas, callback) {
-        var mimeType = 'image/' + params.outputFormat;
-        var dataUrl = canvas.toDataURL(mimeType, params.quality);
-        blobUtil.dataURLToBlob(dataUrl).then(addFileName).then(callback);
-      }
-
-      function addFileName(blob) {
-        blob.name = params.sourceFile.name;
-        return blob;
-      }
-
-      function applyAndResolve(blob) {
-        $rootScope.$apply(resolve);
-
-        function resolve() {
-          deferred.resolve(blob);
+        if (metaData.exif) {
+          options.orientation = metaData.exif.get('Orientation');
         }
-      }
+
+        callback(options);
+      });
     }
 
-    function isPositiveNumber(value) {
-      return angular.isNumber(value) && value > 0;
+    function canvasToBlobAndResolve(canvas) {
+      canvasToBlob(canvas, applyAndResolve);
     }
 
-    function validateParams(params) {
-      params = params || {};
-      validateSourceFile(params.sourceFile);
-      validateMaxWidth(params.maxWidth);
-      validateMaxHeight(params.maxHeight);
-      validateOutputFormat(params.outputFormat);
-      validateQuality(params.quality);
+    function canvasToBlob(canvas, callback) {
+      var mimeType = 'image/' + params.outputFormat;
+      var dataUrl = canvas.toDataURL(mimeType, params.quality);
+      blobUtil.dataURLToBlob(dataUrl).then(addFileName).then(callback);
     }
 
-    function validateSourceFile(sourceFile) {
-      var sourceImageValid =
-        (sourceFile instanceof $window.File  || sourceFile instanceof $window.Blob);
-      if (!sourceImageValid) {
-        throw new Error('params.sourceFile must be instance of File');
-      }
+    function addFileName(blob) {
+      blob.name = params.sourceFile.name;
+      return blob;
     }
 
-    function validateMaxWidth(maxWidth)  {
-      var isMaxWidthValid = maxWidth === undefined || isPositiveNumber(maxWidth);
-      if (!isMaxWidthValid) {
-        throw new Error('params.maxWidth must be a positive Number');
-      }
-    }
+    function applyAndResolve(blob) {
+      $rootScope.$apply(resolve);
 
-    function validateMaxHeight(maxHeight) {
-      var isMaxHeightValid = maxHeight === undefined || isPositiveNumber(maxHeight);
-      if (!isMaxHeightValid) {
-        throw new Error('params.maxHeight must be a positive Number');
-      }
-    }
-
-    function validateOutputFormat(outputFormat) {
-      var isInValidFormats = VALID_FORMATS.indexOf(outputFormat) > -1;
-      var outputFormatValid = outputFormat ? isInValidFormats : true;
-      if (!outputFormatValid) {
-        throw new Error('params.outputFormat format must be one of [' + VALID_FORMATS + ']');
-      }
-    }
-
-    function validateQuality(quality)  {
-      var isQualityValid = quality === undefined || quality > 0 && quality <= 1;
-      if (!isQualityValid) {
-        throw new Error('params.quality must be a Number over 0 and less or equal to 1');
+      function resolve() {
+        deferred.resolve(blob);
       }
     }
   }
-})();
+
+  function isPositiveNumber(value) {
+    return angular.isNumber(value) && value > 0;
+  }
+
+  function validateParams(params) {
+    params = params || {};
+    validateSourceFile(params.sourceFile);
+    validateMaxWidth(params.maxWidth);
+    validateMaxHeight(params.maxHeight);
+    validateOutputFormat(params.outputFormat);
+    validateQuality(params.quality);
+  }
+
+  function validateSourceFile(sourceFile) {
+    var sourceImageValid =
+      (sourceFile instanceof $window.File  || sourceFile instanceof $window.Blob);
+    if (!sourceImageValid) {
+      throw new Error('params.sourceFile must be instance of File');
+    }
+  }
+
+  function validateMaxWidth(maxWidth)  {
+    var isMaxWidthValid = maxWidth === undefined || isPositiveNumber(maxWidth);
+    if (!isMaxWidthValid) {
+      throw new Error('params.maxWidth must be a positive Number');
+    }
+  }
+
+  function validateMaxHeight(maxHeight) {
+    var isMaxHeightValid = maxHeight === undefined || isPositiveNumber(maxHeight);
+    if (!isMaxHeightValid) {
+      throw new Error('params.maxHeight must be a positive Number');
+    }
+  }
+
+  function validateOutputFormat(outputFormat) {
+    var isInValidFormats = VALID_FORMATS.indexOf(outputFormat) > -1;
+    var outputFormatValid = outputFormat ? isInValidFormats : true;
+    if (!outputFormatValid) {
+      throw new Error('params.outputFormat format must be one of [' + VALID_FORMATS + ']');
+    }
+  }
+
+  function validateQuality(quality)  {
+    var isQualityValid = quality === undefined || quality > 0 && quality <= 1;
+    if (!isQualityValid) {
+      throw new Error('params.quality must be a Number over 0 and less or equal to 1');
+    }
+  }
+}
+
+imageCompressor.$inject = ['$q', '$window', '$rootScope'];
