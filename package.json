@@ -7,12 +7,12 @@
     "test": "test"
   },
   "dependencies": {
-    "angular": ">=1.2.*",
+    "angular": "^1.2.0",
     "blob-util": "1.1.1",
     "blueimp-load-image": "1.13.0"
   },
   "devDependencies": {
-    "angular-mocks": ">=1.2.*",
+    "angular-mocks": "^1.2",
     "clean-webpack-plugin": "0.1.8",
     "jasmine-core": "2.4.1",
     "karma": "0.13.21",
