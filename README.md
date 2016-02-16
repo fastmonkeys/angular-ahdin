@@ -23,7 +23,7 @@ After installing the package make sure that the module `ahdin` is defined as you
 ```html
 <script src="bower_components/angular-ahdin/dist/blob-util.min.js"></script>
 <script src="bower_components/angular-ahdin/dist/load-image.all.min.js"></script>
-<script src="bower_components/angular-ahdin/dist/ahdin.js"></script>
+<script src="bower_components/angular-ahdin/dist/angular-ahdin.js"></script>
 
 <script>
   angular.module('yourAwesomeApp', ['ahdin']);

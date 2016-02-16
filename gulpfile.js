@@ -13,10 +13,10 @@ gulp.task('scripts', ['clean', 'deps'], function() {
   return gulp.src('src/*.js')
     .pipe(plugins.angularFilesort())
     .pipe(plugins.ngAnnotate())
-    .pipe(plugins.concat('ahdin.js'))
+    .pipe(plugins.concat('angular-ahdin.js'))
     .pipe(gulp.dest('dist'))
     .pipe(plugins.uglify())
-    .pipe(plugins.rename('ahdin.min.js'))
+    .pipe(plugins.rename('angular-ahdin.min.js'))
     .pipe(gulp.dest('dist'));
 });
 

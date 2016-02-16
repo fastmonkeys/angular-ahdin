@@ -6,7 +6,7 @@
     "Roope Hovi <roope.hovi@gmail.com>"
   ],
   "description": "Image file compression service for AngularJS applications",
-  "main": "dist/ahdin.js",
+  "main": "dist/angular-ahdin.js",
   "moduleType": [
     "globals"
   ],

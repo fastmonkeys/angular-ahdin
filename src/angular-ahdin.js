@@ -1,7 +1,10 @@
 (function() {
   'use strict';
   angular
-    .module('ahdin')
+    .module('ahdin', [])
+    .constant('blobUtil', blobUtil)
+    .constant('loadImage', loadImage)
+    .constant('QUALITY', 0.8)
     .factory('Ahdin', imageCompressor);
 
   function imageCompressor($q, $window, $rootScope, loadImage, blobUtil, QUALITY) {

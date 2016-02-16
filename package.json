@@ -2,7 +2,7 @@
   "name": "angular-ahdin",
   "version": "3.0.2",
   "description": "Image file compression service for AngularJS applications",
-  "main": "dist/ahdin.js",
+  "main": "dist/angular-ahdin.js",
   "directories": {
     "test": "test"
   },
