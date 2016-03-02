@@ -16,16 +16,26 @@ module.exports = {
     library: 'ahdin'
   },
   resolve: {
-    modulesDirectories: ['node_modules', '.']
+    alias: {
+      'load-image$': 'blueimp-load-image/js/load-image.all.min.js',
+      'load-image-exif$': 'blueimp-load-image/js/load-image.all.min.js',
+      'load-image-meta$': 'blueimp-load-image/js/load-image.all.min.js'
+    }
   },
   externals: {
     'angular': 'angular',
-    'blob-util': 'blobUtil',
-    'blueimp-load-image/js/load-image': 'loadImage',
-    'blueimp-load-image/js/load-image-orientation': 'loadImage',
-    'blueimp-load-image/js/load-image-meta': 'loadImage',
-    'blueimp-load-image/js/load-image-exif': 'loadImage',
-    'blueimp-load-image/js/load-image-exif-map': 'loadImage'
+    'blob-util': {
+      amd: 'blob-util',
+      commonjs: 'blob-util',
+      commonjs2: 'blob-util',
+      root: 'blobUtil'
+    },
+    'blueimp-load-image/js/load-image.all.min': {
+      amd: 'blueimp-load-image/js/load-image.all.min',
+      commonjs: 'blueimp-load-image/js/load-image.all.min',
+      commonjs2: 'blueimp-load-image/js/load-image.all.min',
+      root: 'loadImage'
+    }
   },
   devtool: 'source-map',
   plugins: [
