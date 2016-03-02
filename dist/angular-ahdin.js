@@ -1,10 +1,10 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("angular"), require("blobUtil"), require("loadImage"));
+		module.exports = factory(require("angular"), require("blob-util"), require("blueimp-load-image/js/load-image.all.min"));
 	else if(typeof define === 'function' && define.amd)
-		define(["angular", "blobUtil", "loadImage"], factory);
+		define(["angular", "blob-util", "blueimp-load-image/js/load-image.all.min"], factory);
 	else if(typeof exports === 'object')
-		exports["ahdin"] = factory(require("angular"), require("blobUtil"), require("loadImage"));
+		exports["ahdin"] = factory(require("angular"), require("blob-util"), require("blueimp-load-image/js/load-image.all.min"));
 	else
 		root["ahdin"] = factory(root["angular"], root["blobUtil"], root["loadImage"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__) {
@@ -59,11 +59,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var angular = __webpack_require__(1);
 	var blobUtil = __webpack_require__(2);
 	var loadImage = __webpack_require__(3);
-	
-	__webpack_require__(3);
-	__webpack_require__(3);
-	__webpack_require__(3);
-	__webpack_require__(3);
 	
 	module.exports = angular
 	  .module('ahdin', [])
