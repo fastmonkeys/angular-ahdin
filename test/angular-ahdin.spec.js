@@ -1,18 +1,22 @@
 'use strict';
 
+var angular = require('angular');
+var blobUtil = require('blob-util');
+var loadImage = require('blueimp-load-image/js/load-image');
+
+var ahdin = require('../src/angular-ahdin');
+
 describe('Ahdin factory', function() {
   var Ahdin;
   var $rootScope;
   var $window;
-  var blobUtil;
-  beforeEach(angular.mock.module('ahdin'));
+  beforeEach(angular.mock.module(ahdin.name));
 
   beforeEach(angular.mock.inject(
-    function(_Ahdin_, _$rootScope_, _$window_, _blobUtil_) {
+    function(_Ahdin_, _$rootScope_, _$window_) {
       Ahdin = _Ahdin_;
       $rootScope = _$rootScope_;
       $window = _$window_;
-      blobUtil = _blobUtil_;
     }
   ));
 

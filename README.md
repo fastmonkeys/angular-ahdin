@@ -4,26 +4,30 @@ angular-ahdin
 
 Lossy compression module for AngularJS applications. It takes image `File`s or `Blob`s and compresses them to `Blob`s. It also fixes image orientation according to image's EXIF metadata.
 
-Dependencies
-------------
-- AngularJS >=1.2.*
-- [blob-util](https://github.com/nolanlawson/blob-util) (comes bundled with angular-ahdin)
-- [load-image](https://github.com/blueimp/JavaScript-Load-Image) (comes bundled with angular-ahdin)
-
 Installation
 ------------
+
+Via Bower:
+
 ```
 $ bower install --save angular-ahdin
 ```
 
+Via npm:
+
+```
+$ npm install --save angular-ahdin
+```
+
 Setting up the module
 ---------------------
+
 After installing the package make sure that the module `ahdin` is defined as your app's dependency.
 
 ```html
-<script src="bower_components/angular-ahdin/dist/blob-util.min.js"></script>
-<script src="bower_components/angular-ahdin/dist/load-image.all.min.js"></script>
-<script src="bower_components/angular-ahdin/dist/ahdin.js"></script>
+<script src="bower_components/blob-util/dist/blob-util.min.js"></script>
+<script src="bower_components/blueimp-load-image/dist/load-image.all.min.js"></script>
+<script src="bower_components/angular-ahdin/dist/angular-ahdin.js"></script>
 
 <script>
   angular.module('yourAwesomeApp', ['ahdin']);
@@ -57,17 +61,17 @@ Parameter object that is passed to function `compress()` can have the following 
 var parameterObj = {
   // jpeg or png file that is instance of File or Blob
   sourceFile: file, // required
-  
+
   // Maximum width of compressed photo in pixels
   maxWidth: 1000, // optional, defaults to original image width
-  
+
   // Maximum height of compressed photo in pixels
   maxHeight: 1000, // optional, defaults to original image height
-  
+
   // String defining compressed file mime type. Accepted values: 'jpeg' and 'png'
   outputFormat: 'png' // optional, default value 'jpeg'
-  
-  // Image quality when desired outputFormat is 'jpeg' or undefined. Take values 
+
+  // Image quality when desired outputFormat is 'jpeg' or undefined. Take values
   // over 0 and less or equal to 1. If outputFormat is 'png' this has no effect.
   quality: 0.9 // optional, defaults to 0.8
 };
